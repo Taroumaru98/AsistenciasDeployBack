@@ -63,30 +63,22 @@ const bitacoraController = {
     listarPorFicha: async (req, res) => {
         const { IdFicha } = req.params;
         try {
-            let array = [];
             const bitacoras = await Bitacora.find()
-                .populate('IdAprendis');
-            for (let i = 0; i < bitacoras.length; i++) {
-                const bitacora = bitacoras[i];
-                const estudiante = {
-                    _id: bitacora?.IdAprendis?.IdFicha,
-                    name: {
-                        first: "Future",
-                        last: "Studio"
-                    }
-                };
-                const isEqual = estudiante._id.equals(IdFicha);
-                if (bitacora?.IdAprendis?.IdFicha === IdFicha || isEqual) {
-                    array.push(bitacora);
-                }
-            }
-            console.log(`Lista de entradas de bitácora para la ficha ${IdFicha}:`, array);
-            res.json(array);
+                .populate({
+                    path: 'IdAprendis',
+                    match: { IdFicha }
+                });
+    
+            const filteredBitacoras = bitacoras.filter(bitacora => bitacora.IdAprendis);
+    
+            console.log(`Lista de entradas de bitácora para la ficha ${IdFicha}:`, filteredBitacoras);
+            res.json(filteredBitacoras);
         } catch (error) {
             console.error(`Error al listar las entradas de bitácora para la ficha ${IdFicha}:`, error);
             res.status(500).json({ error: `Error al listar las entradas de bitácora para la ficha ${IdFicha}` });
         }
     },
+    
 
     // Listar entradas de bitácora entre dos fechas
     listarPorFechas: async (req, res) => {
